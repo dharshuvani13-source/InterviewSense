@@ -1,0 +1,151 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    /**
+     * INTERVIEWSENSE SECURITY RULES
+     * 
+     * Core Philosophy: 
+     * This ruleset enforces a strict user-ownership model. Every document is nested within a 
+     * user-specific path, ensuring that users can only access their own data.
+     * 
+     * Data Structure: 
+     * All application data (Conversations, Messages, Interview Sessions, Questions, and Answers) 
+     * is organized hierarchically under the /userProfiles/{userId} root.
+     * 
+     * Key Security Decisions: 
+     * 1. Authorization Independence: Every sub-document (e.g., a Message or InterviewAnswer) 
+     *    contains a denormalized 'userId' field. This allows the rules to verify ownership 
+     *    instantly using the document's own data, avoiding slow and expensive get() calls 
+     *    to parent documents.
+     * 2. Strict Path Validation: On creation, the rules enforce that the 'userId' or 
+     *    'firebaseUserId' field within the document matches the {userId} parameter in the 
+     *    URL path.
+     * 3. Relational Immutability: Once a document is created, the 'userId' field is 
+     *    immutable, preventing data from being "stolen" or moved to another user's context.
+     * 4. Prototyping Flexibility: While authorization is strictly enforced, the specific 
+     *    shape and types of content fields are not validated to allow for rapid iteration.
+     */
+
+    // --- Global Helper Functions ---
+
+    /**
+     * @description Checks if the request is from an authenticated user.
+     */
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    /**
+     * @description Checks if the authenticated user's UID matches the provided userId.
+     */
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    /**
+     * @description Checks if the user is the owner and the document exists. 
+     * Used for update and delete operations.
+     */
+    function isExistingOwner(userId) {
+      return isOwner(userId) && resource != null;
+    }
+
+    /**
+     * @description Validates that the userId field in the incoming data matches the path.
+     * Used for initial document creation.
+     */
+    function isValidCreation(userId, fieldName) {
+      return isOwner(userId) && request.resource.data[fieldName] == userId;
+    }
+
+    /**
+     * @description Ensures the ownership field cannot be changed during an update.
+     */
+    function isOwnershipImmutable(fieldName) {
+      return request.resource.data[fieldName] == resource.data[fieldName];
+    }
+
+    // --- Collection Rules ---
+
+    /**
+     * @description Rules for the UserProfile collection. Users can only manage their own profile.
+     * @path /userProfiles/{userId}
+     * @allow (get) If authenticated user UID matches {userId}.
+     * @deny (list) Global listing of user profiles is disallowed.
+     * @principle Enforces self-ownership and prevents user enumeration.
+     */
+    match /userProfiles/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow create: if isValidCreation(userId, 'firebaseUserId');
+      allow update: if isExistingOwner(userId) && isOwnershipImmutable('firebaseUserId');
+      allow delete: if isExistingOwner(userId);
+
+      /**
+       * @description Rules for user-specific Conversations.
+       * @path /userProfiles/{userId}/conversations/{conversationId}
+       * @allow (list) Owner can list their own conversations.
+       * @deny (create) Mismatched userId in the document body.
+       * @principle Uses denormalized userId for path-independent authorization.
+       */
+      match /conversations/{conversationId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isValidCreation(userId, 'userId');
+        allow update: if isExistingOwner(userId) && isOwnershipImmutable('userId');
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for Messages within a specific conversation.
+         * @path /userProfiles/{userId}/conversations/{conversationId}/messages/{messageId}
+         * @allow (create) If user owns the parent path and includes their userId in the message.
+         * @principle Structural segregation ensures only the owner reaches this path.
+         */
+        match /messages/{messageId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isValidCreation(userId, 'userId');
+          allow update: if isExistingOwner(userId) && isOwnershipImmutable('userId');
+          allow delete: if isExistingOwner(userId);
+        }
+      }
+
+      /**
+       * @description Rules for Interview Sessions.
+       * @path /userProfiles/{userId}/interviewSessions/{sessionId}
+       * @allow (update) Owner updating their own session status.
+       * @principle Protects session progress data from unauthorized access.
+       */
+      match /interviewSessions/{sessionId} {
+        allow get, list: if isOwner(userId);
+        allow create: if isValidCreation(userId, 'userId');
+        allow update: if isExistingOwner(userId) && isOwnershipImmutable('userId');
+        allow delete: if isExistingOwner(userId);
+
+        /**
+         * @description Rules for Questions generated within an interview session.
+         * @path /userProfiles/{userId}/interviewSessions/{sessionId}/interviewQuestions/{questionId}
+         * @principle Ownership is verified via the userId denormalized onto the question document.
+         */
+        match /interviewQuestions/{questionId} {
+          allow get, list: if isOwner(userId);
+          allow create: if isValidCreation(userId, 'userId');
+          allow update: if isExistingOwner(userId) && isOwnershipImmutable('userId');
+          allow delete: if isExistingOwner(userId);
+
+          /**
+           * @description Rules for the single Answer document associated with a question.
+           * @path /userProfiles/{userId}/interviewSessions/{sessionId}/interviewQuestions/{questionId}/answer
+           * @allow (get) Owner viewing their AI-generated feedback.
+           * @principle Strict ownership for private interview evaluations.
+           */
+          match /answer {
+            allow get, list: if isOwner(userId);
+            allow create: if isValidCreation(userId, 'userId');
+            allow update: if isExistingOwner(userId) && isOwnershipImmutable('userId');
+            allow delete: if isExistingOwner(userId);
+          }
+        }
+      }
+    }
+  }
+}

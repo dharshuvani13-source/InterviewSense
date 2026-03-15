@@ -1,0 +1,446 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile within the InterviewSense application, storing application-specific data linked to their authentication.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "firebaseUserId": {
+          "type": "string",
+          "description": "The unique identifier provided by Firebase Authentication for the user. (Relationship: Firebase Auth User 1:1 UserProfile)"
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address, primarily for display purposes.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's preferred display name."
+        },
+        "photoUrl": {
+          "type": "string",
+          "description": "URL to the user's profile picture.",
+          "format": "uri"
+        },
+        "knowledgeCredits": {
+          "type": "number",
+          "description": "The number of knowledge credits accumulated by the user through interactions and correct answers."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "firebaseUserId",
+        "email",
+        "displayName",
+        "knowledgeCredits",
+        "createdAt"
+      ]
+    },
+    "Conversation": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Conversation",
+      "type": "object",
+      "description": "Represents a single continuous chat conversation between a user and the AI assistant.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Conversation entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who initiated or owns this conversation. (Relationship: UserProfile 1:N Conversation)"
+        },
+        "title": {
+          "type": "string",
+          "description": "A brief, auto-generated or user-provided title summarizing the conversation's topic."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was initiated.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the conversation was last updated with a new message.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "title",
+        "createdAt"
+      ]
+    },
+    "Message": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Message",
+      "type": "object",
+      "description": "Represents a single message exchange (user query or AI response) within a conversation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Message entity."
+        },
+        "conversationId": {
+          "type": "string",
+          "description": "Reference to the Conversation this message belongs to. (Relationship: Conversation 1:N Message)"
+        },
+        "sender": {
+          "type": "string",
+          "description": "Indicates who sent the message: 'user' or 'ai'."
+        },
+        "text": {
+          "type": "string",
+          "description": "The textual content of the message, either user's question or AI's response."
+        },
+        "audioUrl": {
+          "type": "string",
+          "description": "Optional URL to the audio recording of the message (user's speech or AI's spoken response).",
+          "format": "uri"
+        },
+        "detectedDomain": {
+          "type": "string",
+          "description": "The domain automatically detected by the AI for the user's question (e.g., 'Programming', 'HR Interview')."
+        },
+        "responseTitle": {
+          "type": "string",
+          "description": "The title provided by the AI for its structured response."
+        },
+        "explanation": {
+          "type": "string",
+          "description": "The explanation part of the AI's structured response."
+        },
+        "exampleOrCode": {
+          "type": "string",
+          "description": "The sample answer or code example part of the AI's structured response."
+        },
+        "tipsOrOptimization": {
+          "type": "string",
+          "description": "The key tips or optimization suggestions part of the AI's structured response."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the message was created.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "conversationId",
+        "sender",
+        "text",
+        "createdAt"
+      ]
+    },
+    "InterviewSession": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InterviewSession",
+      "type": "object",
+      "description": "Represents a single mock interview session conducted by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InterviewSession entity."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who started this interview session. (Relationship: UserProfile 1:N InterviewSession)"
+        },
+        "domain": {
+          "type": "string",
+          "description": "The specific domain chosen for the mock interview (e.g., 'Software Developer', 'HR Interview')."
+        },
+        "status": {
+          "type": "string",
+          "description": "The current status of the interview session (e.g., 'started', 'in_progress', 'completed', 'cancelled')."
+        },
+        "overallScore": {
+          "type": "number",
+          "description": "The aggregated score for the entire interview session, if applicable."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when the interview session was started.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp when the interview session was last updated.",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": "string",
+          "description": "Timestamp when the interview session was marked as completed.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "userId",
+        "domain",
+        "status",
+        "createdAt"
+      ]
+    },
+    "InterviewQuestion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InterviewQuestion",
+      "type": "object",
+      "description": "Represents a single question asked by the AI during a mock interview session.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InterviewQuestion entity."
+        },
+        "interviewSessionId": {
+          "type": "string",
+          "description": "Reference to the InterviewSession this question belongs to. (Relationship: InterviewSession 1:N InterviewQuestion)"
+        },
+        "questionText": {
+          "type": "string",
+          "description": "The text of the question posed by the AI."
+        },
+        "questionType": {
+          "type": "string",
+          "description": "The category or type of the question (e.g., 'technical', 'behavioral', 'aptitude')."
+        },
+        "sequenceNumber": {
+          "type": "number",
+          "description": "The sequential order of this question within the interview session."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp when this question was generated and presented.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "interviewSessionId",
+        "questionText",
+        "sequenceNumber",
+        "createdAt"
+      ]
+    },
+    "InterviewAnswer": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "InterviewAnswer",
+      "type": "object",
+      "description": "Represents a user's answer to a specific interview question and the AI's subsequent evaluation.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the InterviewAnswer entity."
+        },
+        "interviewQuestionId": {
+          "type": "string",
+          "description": "Reference to the InterviewQuestion this answer corresponds to. (Relationship: InterviewQuestion 1:1 InterviewAnswer)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who provided this answer. (Relationship: UserProfile 1:N InterviewAnswer)"
+        },
+        "answerText": {
+          "type": "string",
+          "description": "The textual content of the user's answer, derived from speech-to-text or direct input."
+        },
+        "audioUrl": {
+          "type": "string",
+          "description": "Optional URL to the audio recording of the user's spoken answer.",
+          "format": "uri"
+        },
+        "clarityFeedback": {
+          "type": "string",
+          "description": "AI's feedback on the clarity of the user's answer."
+        },
+        "confidenceFeedback": {
+          "type": "string",
+          "description": "AI's feedback on the confidence conveyed in the user's answer."
+        },
+        "technicalAccuracyFeedback": {
+          "type": "string",
+          "description": "AI's feedback on the technical accuracy of the user's answer."
+        },
+        "improvementSuggestions": {
+          "type": "string",
+          "description": "AI's suggestions for improving the user's answer."
+        },
+        "score": {
+          "type": "number",
+          "description": "A numerical score assigned by the AI for this specific answer."
+        },
+        "knowledgeCreditsEarned": {
+          "type": "number",
+          "description": "The number of knowledge credits earned for this answer."
+        },
+        "evaluatedAt": {
+          "type": "string",
+          "description": "Timestamp when the AI completed the evaluation of this answer.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "interviewQuestionId",
+        "userId",
+        "answerText",
+        "clarityFeedback",
+        "confidenceFeedback",
+        "technicalAccuracyFeedback",
+        "improvementSuggestions",
+        "score",
+        "evaluatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/userProfiles/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Stores individual user profiles. Each document's `firebaseUserId` field must match the `{userId}` path parameter for authorization independence. Access is restricted to the authenticated user whose `uid` matches `{userId}`."
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/conversations/{conversationId}",
+        "definition": {
+          "entityName": "Conversation",
+          "schema": {
+            "$ref": "#/backend/entities/Conversation"
+          },
+          "description": "Contains a user's chat conversations with the AI. Each document includes the `userId` field, which must be denormalized from the parent path, to enable direct authorization checks (`request.auth.uid == resource.data.userId`) without requiring a `get()` call.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this conversation."
+            },
+            {
+              "name": "conversationId",
+              "description": "The unique identifier for the conversation."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/conversations/{conversationId}/messages/{messageId}",
+        "definition": {
+          "entityName": "Message",
+          "schema": {
+            "$ref": "#/backend/entities/Message"
+          },
+          "description": "Stores individual messages within a conversation. Each message document must include a denormalized `userId` (matching the user's `uid`) and `conversationId` (matching the parent conversation's ID) for authorization independence and simplified security rules.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this message's conversation."
+            },
+            {
+              "name": "conversationId",
+              "description": "The unique identifier of the parent conversation."
+            },
+            {
+              "name": "messageId",
+              "description": "The unique identifier for the message."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/interviewSessions/{sessionId}",
+        "definition": {
+          "entityName": "InterviewSession",
+          "schema": {
+            "$ref": "#/backend/entities/InterviewSession"
+          },
+          "description": "Stores records of mock interview sessions. Each document includes the `userId` field, which must be denormalized from the parent path, to enable direct authorization checks (`request.auth.uid == resource.data.userId`).",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this interview session."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier for the interview session."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/interviewSessions/{sessionId}/interviewQuestions/{questionId}",
+        "definition": {
+          "entityName": "InterviewQuestion",
+          "schema": {
+            "$ref": "#/backend/entities/InterviewQuestion"
+          },
+          "description": "Stores questions asked by the AI during a specific interview session. Each document must include a denormalized `userId` (matching the user's `uid`) and `interviewSessionId` (matching the parent session's ID) for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this interview session."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier of the parent interview session."
+            },
+            {
+              "name": "questionId",
+              "description": "The unique identifier for the interview question."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/userProfiles/{userId}/interviewSessions/{sessionId}/interviewQuestions/{questionId}/answer",
+        "definition": {
+          "entityName": "InterviewAnswer",
+          "schema": {
+            "$ref": "#/backend/entities/InterviewAnswer"
+          },
+          "description": "Stores the user's answer and AI's evaluation for a specific interview question. This is a sub-document with a fixed ID (`answer`) due to its 1:1 relationship with `InterviewQuestion`. It includes denormalized `userId`, `interviewSessionId`, and `interviewQuestionId` for authorization independence.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who provided this answer."
+            },
+            {
+              "name": "sessionId",
+              "description": "The unique identifier of the parent interview session."
+            },
+            {
+              "name": "questionId",
+              "description": "The unique identifier of the parent interview question."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for InterviewSense prioritizes security, scalability, and debuggability by adhering to core design principles, especially Authorization Independence and Structural Segregation. All user-specific data is nested under a top-level `/userProfiles/{userId}` collection. This enforces path-based ownership, making authorization rules straightforward and highly efficient.\n\n**Authorization Independence (CRITICAL):** This structure explicitly achieves Authorization Independence through systematic denormalization. For every document in subcollections (e.g., `conversations`, `messages`, `interviewSessions`, `interviewQuestions`, `answer`), relevant ancestor IDs, specifically the `userId`, are explicitly stored within the document itself. For example, a `Message` document at `/userProfiles/{userId}/conversations/{conversationId}/messages/{messageId}` will contain a `userId` field (matching `{userId}`) and a `conversationId` field (matching `{conversationId}`). This eliminates the need for `get()` operations in security rules to check parent document ownership, allowing rules to evaluate authorization solely based on the document's own fields and `request.auth.uid`. This design enables atomic operations and simplifies rule debugging.\n\n**Structural Segregation (Homogeneous Security Posture):** By nesting all user data under `/userProfiles/{userId}`, all documents within a given user's branch (`/userProfiles/{userId}/...`) implicitly share the same fundamental security posture: they are owned and accessible only by that specific user. There's no mixing of public and private data or different access levels within the same collection. For instance, all `messages` under a `conversation` are private to the owning user. This greatly simplifies security rules, as a single rule applies consistently to all documents in these segregated collections.\n\n**QAPs (Rules are not Filters):** The structure facilitates secure `list` operations without rules acting as filters. When a user queries `/userProfiles/{request.auth.uid}/conversations`, the Firestore security rules can simply check `allow list: if request.auth.uid == userId;` where `userId` is a field in each `Conversation` document. Since all documents in that specific user's `conversations` subcollection will inherently have their `userId` field matching `request.auth.uid`, every document returned by the query will satisfy the security rule. This ensures that `list` queries are efficient and only return data the user is authorized to see, without Firestore needing to filter results after retrieving them, which aligns with the QAP principle."
+  }
+}
