@@ -1,1 +1,6 @@
-// Flows will be imported for their side effects in this file.
+import { config } from 'dotenv';
+config();
+
+import '@/ai/flows/ai-interview-answer-feedback.ts';
+import '@/ai/flows/voice-assistant-query.ts';
+import '@/ai/flows/generate-mock-interview-question-flow.ts';

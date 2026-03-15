@@ -1,0 +1,22 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-interview",
+      "description": "Professional interview setting",
+      "imageUrl": "https://picsum.photos/seed/interview1/1200/800",
+      "imageHint": "professional interview"
+    },
+    {
+      "id": "coding-session",
+      "description": "Developer coding at a desk",
+      "imageUrl": "https://picsum.photos/seed/coding1/600/400",
+      "imageHint": "developer coding"
+    },
+    {
+      "id": "avatar-user",
+      "description": "User profile avatar",
+      "imageUrl": "https://picsum.photos/seed/user1/200/200",
+      "imageHint": "user avatar"
+    }
+  ]
+}
