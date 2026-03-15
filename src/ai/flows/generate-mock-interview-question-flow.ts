@@ -1,7 +1,6 @@
 'use server';
 /**
- * @fileOverview This flow generates a single mock interview question.
- * It now categorizes questions as 'conceptual' (voice-only) or 'solving' (code/numeric).
+ * @fileOverview Generates modern mock interview questions across expanded domains.
  */
 
 import { ai } from '@/ai/genkit';
@@ -39,15 +38,22 @@ const generateMockInterviewQuestionPrompt = ai.definePrompt({
   name: 'generateMockInterviewQuestionPrompt',
   input: { schema: GenerateMockInterviewQuestionInputSchema },
   output: { schema: GenerateMockInterviewQuestionOutputSchema },
-  prompt: `You are an experienced interviewer. Generate a single interview question.
+  prompt: `You are an experienced industry interviewer. Generate a single professional interview question.
 
 Maintain a strict 50/50 ratio between 'conceptual' and 'solving' questions.
-- 'conceptual': Focus on soft skills, architecture, or theoretical concepts. Answered via voice.
-- 'solving': Focus on coding, debugging, or numeric calculations. Requires a solving board.
+- 'conceptual': Focus on architecture, trade-offs, soft skills, or advanced theory. Answered via voice.
+- 'solving': Focus on coding algorithms, debugging logic, or complex numeric calculations. Requires a solving board.
 
-Domain: {{#if domain}}{{{domain}}}{{else}}General Software Engineering{{/if}}
+Current Era Domains:
+- AI Engineer: LLMs, prompt engineering, vector DBs.
+- Cloud Architect: AWS/Azure/GCP, scalability, serverless.
+- Cybersecurity: Zero trust, encryption, vulnerability analysis.
+- Full Stack: Next.js, performance, React patterns.
+- Product Manager (Tech): System trade-offs, roadmap logic.
 
-Provide clear, professional questions. For 'solving' questions, provide a small snippet of code or a scenario in 'initialCode'.`,
+Selected Domain: {{#if domain}}{{{domain}}}{{else}}General Software Engineering{{/if}}
+
+Provide high-quality, relevant questions that a real mentor would ask to test boundaries.`,
 });
 
 const generateMockInterviewQuestionFlow = ai.defineFlow(
