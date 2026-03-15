@@ -49,7 +49,7 @@ export function VoiceInteraction() {
     }
   }, [query, isProcessing, stopListening, autoSpeak])
 
-  // Silence detection: Wait 2 seconds of silence then auto-submit
+  // Silence detection: Wait 2 seconds of silence then auto-submit for immediate answer
   useEffect(() => {
     if (isListening && transcript) {
       if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current)
@@ -100,7 +100,7 @@ export function VoiceInteraction() {
                 <div className="w-12 h-12 rounded-full bg-secondary/20 flex items-center justify-center voice-ripple">
                   <Mic className="text-secondary w-6 h-6" />
                 </div>
-                <p className="text-sm font-medium animate-pulse text-secondary">Listening... Stop speaking to submit.</p>
+                <p className="text-sm font-medium animate-pulse text-secondary">Listening... Auto-submitting in 2s of silence.</p>
                 <p className="text-lg text-primary max-w-md italic font-medium">{query || '...'}</p>
               </div>
             ) : isProcessing ? (

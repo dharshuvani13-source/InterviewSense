@@ -57,8 +57,7 @@ If a domain is provided ({{#if domain}}{{{domain}}}{{else}}not specified{{/if}})
 
 Based on the provided domain (or a suitable inferred domain), generate one interview question, identify the primary skill it assesses, and assign a difficulty level.
 
-Strictly return a JSON object with the following structure:
-{{jsonSchema outputSchema}}`,
+Ensure the output strictly follows the required JSON format.`,
 });
 
 const generateMockInterviewQuestionFlow = ai.defineFlow(
