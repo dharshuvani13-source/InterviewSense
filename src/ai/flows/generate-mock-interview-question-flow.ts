@@ -1,10 +1,7 @@
 'use server';
 /**
- * @fileOverview This flow generates a single mock interview question based on a specified or auto-detected domain.
- *
- * - generateMockInterviewQuestion - A function that handles the generation of a mock interview question.
- * - GenerateMockInterviewQuestionInput - The input type for the generateMockInterviewQuestion function.
- * - GenerateMockInterviewQuestionOutput - The return type for the generateMockInterviewQuestion function.
+ * @fileOverview This flow generates a single mock interview question.
+ * It now categorizes questions as 'conceptual' (voice-only) or 'solving' (code/numeric).
  */
 
 import { ai } from '@/ai/genkit';
@@ -14,9 +11,7 @@ const GenerateMockInterviewQuestionInputSchema = z.object({
   domain: z
     .string()
     .optional()
-    .describe(
-      'The domain for which to generate an interview question (e.g., "Software Developer", "HR Interview"). If not provided, the AI will infer a suitable domain.'
-    ),
+    .describe('The domain (e.g., "Software Developer").'),
 });
 export type GenerateMockInterviewQuestionInput = z.infer<
   typeof GenerateMockInterviewQuestionInputSchema
@@ -24,17 +19,11 @@ export type GenerateMockInterviewQuestionInput = z.infer<
 
 const GenerateMockInterviewQuestionOutputSchema = z.object({
   question: z.string().describe('The mock interview question generated.'),
-  domain: z
-    .string()
-    .describe('The domain this question belongs to (e.g., "Software Developer", "Programming").'),
-  skillAssessed: z
-    .string()
-    .describe(
-      'The primary skill this question aims to assess (e.g., "Data Structures", "Problem Solving", "Behavioral", "Communication").'
-    ),
-  difficulty: z
-    .enum(['easy', 'medium', 'hard'])
-    .describe('The difficulty level of the question.'),
+  domain: z.string().describe('The domain this question belongs to.'),
+  skillAssessed: z.string().describe('The primary skill assessed.'),
+  difficulty: z.enum(['easy', 'medium', 'hard']).describe('Difficulty level.'),
+  type: z.enum(['conceptual', 'solving']).describe('The type of question: conceptual (conceptual/behavioral) or solving (technical/coding/numeric).'),
+  initialCode: z.string().optional().describe('Starter code or a template if it is a solving question.'),
 });
 export type GenerateMockInterviewQuestionOutput = z.infer<
   typeof GenerateMockInterviewQuestionOutputSchema
@@ -50,14 +39,15 @@ const generateMockInterviewQuestionPrompt = ai.definePrompt({
   name: 'generateMockInterviewQuestionPrompt',
   input: { schema: GenerateMockInterviewQuestionInputSchema },
   output: { schema: GenerateMockInterviewQuestionOutputSchema },
-  prompt: `You are an experienced interviewer from a top tech company. Your task is to generate a single, relevant interview question for a mock interview session.
-The question should be concise and designed to assess specific skills.
+  prompt: `You are an experienced interviewer. Generate a single interview question.
 
-If a domain is provided ({{#if domain}}{{{domain}}}{{else}}not specified{{/if}}), tailor the question to that domain. If no domain is provided, choose a common interview domain like 'Software Developer' or 'HR Interview' and generate a relevant question.
+Maintain a strict 50/50 ratio between 'conceptual' and 'solving' questions.
+- 'conceptual': Focus on soft skills, architecture, or theoretical concepts. Answered via voice.
+- 'solving': Focus on coding, debugging, or numeric calculations. Requires a solving board.
 
-Based on the provided domain (or a suitable inferred domain), generate one interview question, identify the primary skill it assesses, and assign a difficulty level.
+Domain: {{#if domain}}{{{domain}}}{{else}}General Software Engineering{{/if}}
 
-Ensure the output strictly follows the required JSON format.`,
+Provide clear, professional questions. For 'solving' questions, provide a small snippet of code or a scenario in 'initialCode'.`,
 });
 
 const generateMockInterviewQuestionFlow = ai.defineFlow(
