@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import * as wav from 'wav';
+import wav from 'wav';
 import { googleAI } from '@genkit-ai/google-genai';
 
 // Input Schema: The user's question as a string
