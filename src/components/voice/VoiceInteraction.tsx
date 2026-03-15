@@ -1,9 +1,9 @@
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
-import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Loader2 } from 'lucide-react'
+import { Mic, MicOff, Send, Volume2, VolumeX, Sparkles, Loader2, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
 import { voiceAssistantQuery, type VoiceAssistantQueryOutput } from '@/ai/flows/voice-assistant-query'
