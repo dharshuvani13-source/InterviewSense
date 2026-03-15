@@ -1,7 +1,7 @@
 'use server';
 /**
- * @fileOverview This flow handles voice-based AI assistant queries, converting speech to text, 
- * processing with Gemini AI to generate structured answers, and converting the answer back to speech.
+ * @fileOverview This flow handles voice-based AI assistant queries.
+ * Optimized for high-speed, precise responses with concise structure.
  */
 
 import { ai } from '@/ai/genkit';
@@ -16,13 +16,13 @@ export type VoiceAssistantQueryInput = z.infer<typeof VoiceAssistantQueryInputSc
 
 const VoiceAssistantTextOutputSchema = z.object({
   title: z.string().describe('A concise title for the answer.'),
-  explanation: z.string().describe('A detailed explanation of the concept or answer.'),
-  example: z.string().describe('A relevant example, sample answer, or code snippet related to the explanation.'),
-  keyTips: z.array(z.string()).describe('A list of key tips or optimization suggestions.'),
+  explanation: z.string().describe('A direct and brief explanation.'),
+  example: z.string().describe('A short code snippet or single-sentence example.'),
+  keyTips: z.array(z.string()).describe('Exactly 3 critical tips.'),
 });
 
 const VoiceAssistantQueryOutputSchema = VoiceAssistantTextOutputSchema.extend({
-  audio: z.string().describe("Base64 encoded audio in WAV format, representing the spoken AI response."),
+  audio: z.string().describe("Base64 encoded audio in WAV format."),
 });
 export type VoiceAssistantQueryOutput = z.infer<typeof VoiceAssistantQueryOutputSchema>;
 
@@ -57,13 +57,13 @@ const voiceAssistantPrompt = ai.definePrompt({
   name: 'voiceAssistantPrompt',
   input: { schema: VoiceAssistantQueryInputSchema },
   output: { schema: VoiceAssistantTextOutputSchema },
-  prompt: `You are an expert interview coach and technical assistant. Your goal is to provide concise, helpful, and structured answers to interview-related and programming questions.
+  prompt: `You are a high-speed technical assistant. Provide ultra-concise, precise answers. 
 
-Analyze the user's question and provide:
-1. A concise Title.
-2. A clear and detailed Explanation.
-3. A relevant Example or Sample Answer.
-4. A list of Key Tips.
+Rules:
+- Title: 2-4 words maximum.
+- Explanation: Exactly 2 sentences.
+- Example: Very short code or practical scenario.
+- Key Tips: Provide exactly 3 bullet points.
 
 Question: {{{question}}}`,
 });
@@ -78,10 +78,10 @@ const voiceAssistantQueryFlow = ai.defineFlow(
     const { output: textResponse } = await voiceAssistantPrompt(input);
 
     if (!textResponse) {
-      throw new Error('AI failed to generate a text response.');
+      throw new Error('AI failed to generate a response.');
     }
 
-    const fullTextForSpeech = `Title: ${textResponse.title}. Explanation: ${textResponse.explanation}. Example: ${textResponse.example}. Key tips: ${textResponse.keyTips.join('. ')}.`;
+    const fullTextForSpeech = `${textResponse.title}. ${textResponse.explanation}. Tips: ${textResponse.keyTips.join('. ')}`;
 
     const { media } = await ai.generate({
       model: googleAI.model('gemini-2.5-flash-preview-tts'),
@@ -97,7 +97,7 @@ const voiceAssistantQueryFlow = ai.defineFlow(
     });
 
     if (!media) {
-      throw new Error('No audio media returned from TTS.');
+      throw new Error('No audio returned.');
     }
 
     const audioBuffer = Buffer.from(
