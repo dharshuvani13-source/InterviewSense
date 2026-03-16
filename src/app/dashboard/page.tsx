@@ -1,7 +1,8 @@
 
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { DashboardSidebar } from '@/components/layout/DashboardSidebar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
@@ -25,6 +26,14 @@ import { doc, collection, query, orderBy, limit } from 'firebase/firestore'
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser()
   const db = useFirestore()
+  const router = useRouter()
+
+  // Authentication redirect
+  useEffect(() => {
+    if (!isUserLoading && !user) {
+      router.push('/auth')
+    }
+  }, [user, isUserLoading, router])
 
   // Real-time User Profile Data fetched via official hooks
   const profileDocRef = useMemoFirebase(() => {
@@ -52,6 +61,8 @@ export default function DashboardPage() {
       </div>
     )
   }
+
+  if (!user) return null;
 
   const displayName = user?.displayName || user?.email?.split('@')[0] || "Professional"
   const knowledgeCredits = profileData?.knowledgeCredits || 0;
@@ -112,7 +123,7 @@ export default function DashboardPage() {
               <TrendingUp className="text-green-500 w-5 h-5" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">{knowledgeCredits > 0 ? '+12%' : 'N/A'}</div>
+              <div className="text-3xl font-bold text-primary">{knowledgeCredits > 0 ? '+12%' : '0%'}</div>
               <p className="text-xs text-muted-foreground mt-1">Weekly progress</p>
             </CardContent>
           </Card>
@@ -202,7 +213,9 @@ export default function DashboardPage() {
                   </div>
                   <Progress value={Math.min((knowledgeCredits / 1000) * 100, 100)} className="bg-white/20" />
                 </div>
-                <Button variant="secondary" className="w-full font-bold" disabled={knowledgeCredits < 100}>Redeem Rewards</Button>
+                <Link href="/credits">
+                  <Button variant="secondary" className="w-full font-bold">Manage Credits</Button>
+                </Link>
               </CardContent>
             </Card>
 
