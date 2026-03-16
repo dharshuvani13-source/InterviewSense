@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { 
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
-  signInAnonymously,
   sendPasswordResetEmail
 } from 'firebase/auth'
 import { useAuth } from '@/firebase'
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { MessageSquareQuote, Mail, Lock, Sparkles, Loader2, UserCircle, Eye, EyeOff } from 'lucide-react'
+import { MessageSquareQuote, Mail, Lock, Sparkles, Loader2, Eye, EyeOff } from 'lucide-react'
 import Link from 'next/link'
 import { useToast } from '@/hooks/use-toast'
 import {
@@ -38,22 +37,6 @@ export default function AuthPage() {
   const auth = useAuth()
   const router = useRouter()
   const { toast } = useToast()
-
-  const handleAnonymousSignIn = async () => {
-    setIsLoading(true)
-    try {
-      await signInAnonymously(auth)
-      router.push('/dashboard')
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Error",
-        description: error.message
-      })
-    } finally {
-      setIsLoading(false)
-    }
-  }
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -199,25 +182,6 @@ export default function AuthPage() {
               {isLoading ? <Loader2 className="animate-spin" /> : (isLogin ? "Sign In" : "Sign Up")}
             </Button>
           </form>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-muted-foreground">Or continue as</span>
-            </div>
-          </div>
-
-          <Button 
-            variant="outline" 
-            className="w-full h-11 gap-3 font-medium border-primary/10 hover:bg-primary/5" 
-            onClick={handleAnonymousSignIn}
-            disabled={isLoading}
-          >
-            <UserCircle className="w-5 h-5 text-muted-foreground" />
-            Guest Access
-          </Button>
         </CardContent>
         <CardFooter className="justify-center bg-muted/20 py-4">
           <button 

@@ -108,7 +108,6 @@ export default function ProfilePage() {
                   <Badge variant="secondary" className="bg-primary/5 text-primary border-primary/10">
                     <ShieldCheck className="w-3 h-3 mr-1" /> Verified Member
                   </Badge>
-                  {user?.isAnonymous && <Badge variant="outline">Guest</Badge>}
                 </div>
               </div>
             </CardHeader>

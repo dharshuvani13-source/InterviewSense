@@ -2,12 +2,11 @@
 "use client"
 
 import React from 'react'
-import Link from 'next/link'
+import Link from 'link'
 import { usePathname, useRouter } from 'next/navigation'
 import { 
   Mic2, 
   History, 
-  User, 
   Settings, 
   LayoutDashboard, 
   Trophy,
@@ -88,7 +87,7 @@ export function DashboardSidebar() {
             </Avatar>
             <div className="flex flex-col min-w-0">
               <span className="text-sm font-bold text-primary truncate">
-                {user?.displayName || (user?.isAnonymous ? 'Guest User' : 'Professional')}
+                {user?.displayName || 'Professional'}
               </span>
               <span className="text-[10px] text-muted-foreground truncate">View Profile</span>
             </div>
