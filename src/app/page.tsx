@@ -13,7 +13,9 @@ import {
   BrainCircuit,
   ArrowRight,
   Sparkles,
-  CheckCircle2
+  CheckCircle2,
+  Terminal,
+  Code2
 } from 'lucide-react'
 import { useUser } from '@/firebase'
 
@@ -54,7 +56,7 @@ export default function LandingPage() {
 
       {/* Hero Section */}
       <main className="flex-1">
-        <section className="flex flex-col items-center justify-center text-center px-6 py-20 max-w-5xl mx-auto space-y-8">
+        <section className="flex flex-col items-center justify-center text-center px-6 py-24 max-w-5xl mx-auto space-y-8">
           <div className="animate-in fade-in zoom-in duration-700">
              <Badge variant="outline" className="text-primary border-primary bg-primary/5 px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2 mb-6">
                <Sparkles className="w-4 h-4" /> AI-Powered Preparation Platform
@@ -64,7 +66,7 @@ export default function LandingPage() {
             Master Any Interview with <span className="text-secondary underline decoration-secondary/30">AI Guidance.</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl leading-relaxed">
-            The all-in-one platform for job seekers. Practice voice-based mock interviews, get instant feedback, and solve technical challenges with Gemini AI.
+            Practice voice-based mock interviews, get instant technical feedback, and solve complex coding challenges with Gemini AI.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 pt-4">
             <Link href={user ? "/dashboard" : "/auth"}>
@@ -81,9 +83,14 @@ export default function LandingPage() {
         {/* Visual Features Section */}
         <section id="features" className="py-24 bg-primary/[0.02] border-y">
           <div className="max-w-7xl mx-auto px-6">
-            <h2 className="text-4xl md:text-5xl font-headline font-bold text-center text-primary mb-20">
-              Powerful Features for Career Growth
-            </h2>
+            <div className="text-center max-w-3xl mx-auto mb-20">
+              <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary mb-6">
+                Engineered for Professional Excellence
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                We've combined advanced Speech-to-Text with Gemini's reasoning to create a realistic simulation that pushes your boundaries.
+              </p>
+            </div>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-16">
               {/* Feature 1: Solving Board */}
@@ -97,7 +104,7 @@ export default function LandingPage() {
                          <div className="w-2 h-2 rounded-full bg-yellow-400" />
                          <div className="w-2 h-2 rounded-full bg-green-400" />
                        </div>
-                       <Badge variant="outline" className="text-[10px] scale-75">workspace.ts</Badge>
+                       <Badge variant="outline" className="text-[10px] scale-75 font-mono">workspace.ts</Badge>
                     </div>
                     <div className="flex-1 font-mono text-left text-[11px] text-primary/70 space-y-1">
                       <p><span className="text-blue-500">function</span> <span className="text-emerald-500">solveChallenge</span>() {'{'}</p>
@@ -113,7 +120,7 @@ export default function LandingPage() {
                 </div>
                 <div>
                   <h3 className="text-2xl font-headline font-bold text-primary mb-3">Interactive Solving Board</h3>
-                  <p className="text-muted-foreground">Master technical, numeric, and coding challenges with an integrated IDE that evaluates your logic in real-time.</p>
+                  <p className="text-muted-foreground">Practice technical and coding challenges with an integrated board that evaluates your logic and precision.</p>
                 </div>
               </div>
 
@@ -134,13 +141,13 @@ export default function LandingPage() {
                       <div className="h-3 w-1/2 bg-muted rounded-full mx-auto" />
                     </div>
                     <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10 italic text-sm text-primary">
-                      "Tell me about closure in JS..."
+                      "Explain the virtual DOM..."
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-2xl font-headline font-bold text-primary mb-3">AI Voice Assistant</h3>
-                  <p className="text-muted-foreground">Natural language interaction for career advice, technical explanations, and quick soft-skill practice sessions.</p>
+                  <p className="text-muted-foreground">Natural language interaction for career advice, technical explanations, and quick soft-skill sessions.</p>
                 </div>
               </div>
 
@@ -153,7 +160,7 @@ export default function LandingPage() {
                       <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-bold">M</div>
                       <div className="text-left">
                         <p className="text-xs font-bold text-primary">AI Mentor</p>
-                        <p className="text-[10px] text-muted-foreground">Strict-Moderate Mode</p>
+                        <p className="text-[10px] text-muted-foreground">Firm-Moderate Mode</p>
                       </div>
                     </div>
                     <div className="space-y-3">
@@ -168,14 +175,14 @@ export default function LandingPage() {
                     <div className="p-3 bg-secondary/5 rounded-xl border border-secondary/10 text-left">
                       <div className="flex gap-2 items-start">
                         <Zap className="w-4 h-4 text-secondary shrink-0 mt-0.5" />
-                        <p className="text-[11px] leading-relaxed text-primary">"A stronger candidate would mention the performance trade-offs of this approach..."</p>
+                        <p className="text-[11px] leading-relaxed text-primary">"A stronger candidate would mention the performance trade-offs..."</p>
                       </div>
                     </div>
                   </div>
                 </div>
                 <div>
                   <h3 className="text-2xl font-headline font-bold text-primary mb-3">Expert AI Feedback</h3>
-                  <p className="text-muted-foreground">Receive professional, mentor-like analysis on clarity, technical precision, and confidence levels.</p>
+                  <p className="text-muted-foreground">Receive mentor-like analysis on clarity, technical precision, and communication style.</p>
                 </div>
               </div>
             </div>
