@@ -19,38 +19,33 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useUser, useDoc, useCollection, useMemoFirebase } from '@/firebase'
+import { useUser, useDoc, useCollection, useMemoFirebase, useFirestore } from '@/firebase'
 import { doc, collection, query, orderBy, limit } from 'firebase/firestore'
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser()
+  const db = useFirestore()
 
-  // Real-time User Profile Data
-  const profileRef = useMemoFirebase(() => {
-    return user ? doc(collection(user.auth.app.options.projectId === 'studio-5534266819-bd84a' ? 'userProfiles' : 'userProfiles'), user.uid) : null;
-  }, [user]);
-  // Actually, use our standard indexing
-  const userProfileRef = useMemoFirebase(() => {
-    if (!user) return null;
-    // We use the firestore instance from useFirestore but hooks handle it
-    return doc(collection(user.auth.app as any, 'userProfiles'), user.uid);
-  }, [user]);
-
-  // Better approach using the provided hooks
-  const profileDoc = useDoc(useMemoFirebase(() => user ? doc(collection(user.auth.app as any, 'userProfiles'), user.uid) : null, [user]));
+  // Real-time User Profile Data fetched via official hooks
+  const profileDocRef = useMemoFirebase(() => {
+    if (!user || !db) return null;
+    return doc(db, 'userProfiles', user.uid);
+  }, [user, db]);
+  
+  const { data: profileData, isLoading: profileLoading } = useDoc(profileDocRef);
   
   const sessionsQuery = useMemoFirebase(() => {
-    if (!user) return null;
+    if (!user || !db) return null;
     return query(
-      collection(user.auth.app as any, 'userProfiles', user.uid, 'interviewSessions'),
+      collection(db, 'userProfiles', user.uid, 'interviewSessions'),
       orderBy('createdAt', 'desc'),
       limit(5)
     );
-  }, [user]);
+  }, [user, db]);
 
   const { data: sessions, isLoading: sessionsLoading } = useCollection(sessionsQuery);
 
-  if (isUserLoading || sessionsLoading) {
+  if (isUserLoading || sessionsLoading || profileLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -58,7 +53,6 @@ export default function DashboardPage() {
     )
   }
 
-  const profileData = profileDoc.data;
   const displayName = user?.displayName || user?.email?.split('@')[0] || "Professional"
   const knowledgeCredits = profileData?.knowledgeCredits || 0;
   const sessionsCount = sessions?.length || 0;
