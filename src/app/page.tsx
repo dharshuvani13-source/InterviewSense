@@ -5,6 +5,8 @@ import React from 'react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { 
   Mic2, 
   MessageSquareQuote, 
@@ -14,8 +16,9 @@ import {
   ArrowRight,
   Sparkles,
   CheckCircle2,
-  Terminal,
-  Code2
+  Mail,
+  MapPin,
+  Phone
 } from 'lucide-react'
 import { useUser } from '@/firebase'
 
@@ -188,6 +191,76 @@ export default function LandingPage() {
             </div>
           </div>
         </section>
+
+        {/* Contact Us Section */}
+        <section id="contact" className="py-24 px-6">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+            <div className="space-y-8">
+              <div className="space-y-4">
+                <h2 className="text-4xl md:text-5xl font-headline font-bold text-primary">Get in Touch</h2>
+                <p className="text-lg text-muted-foreground">
+                  Have questions about our platform or enterprise solutions? Our team of experts is here to help you accelerate your career.
+                </p>
+              </div>
+
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
+                    <Mail className="text-primary w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-primary uppercase tracking-widest">Email Us</p>
+                    <p className="text-muted-foreground">support@interviewsense.ai</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-secondary/5 flex items-center justify-center border border-secondary/10">
+                    <MapPin className="text-secondary w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-secondary uppercase tracking-widest">Office</p>
+                    <p className="text-muted-foreground">Innovation Drive, Silicon Valley, CA</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-primary/5 flex items-center justify-center border border-primary/10">
+                    <Phone className="text-primary w-6 h-6" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-primary uppercase tracking-widest">Call Us</p>
+                    <p className="text-muted-foreground">+1 (555) 000-SENZE</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-white p-8 md:p-10 rounded-3xl shadow-2xl border border-primary/5">
+              <form className="space-y-6" onSubmit={(e) => e.preventDefault()}>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-primary/60 uppercase tracking-tighter">First Name</label>
+                    <Input placeholder="John" className="h-12 rounded-xl" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-bold text-primary/60 uppercase tracking-tighter">Last Name</label>
+                    <Input placeholder="Doe" className="h-12 rounded-xl" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-primary/60 uppercase tracking-tighter">Email Address</label>
+                  <Input type="email" placeholder="john@example.com" className="h-12 rounded-xl" />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-primary/60 uppercase tracking-tighter">Message</label>
+                  <Textarea placeholder="How can we help you?" className="min-h-[120px] rounded-xl resize-none" />
+                </div>
+                <Button className="w-full h-14 text-lg font-bold rounded-xl shadow-lg shadow-primary/20 gap-2">
+                  Send Message <ArrowRight className="w-5 h-5" />
+                </Button>
+              </form>
+            </div>
+          </div>
+        </section>
       </main>
 
       {/* Trust Bar */}
@@ -203,7 +276,7 @@ export default function LandingPage() {
           <div className="flex gap-6 text-sm text-primary font-medium">
             <Link href="#">Privacy Policy</Link>
             <Link href="#">Terms of Service</Link>
-            <Link href="#">Contact Support</Link>
+            <Link href="#contact">Contact Support</Link>
           </div>
         </div>
       </footer>
