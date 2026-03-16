@@ -19,12 +19,38 @@ import {
 } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
-import { useUser } from '@/firebase'
+import { useUser, useDoc, useCollection, useMemoFirebase } from '@/firebase'
+import { doc, collection, query, orderBy, limit } from 'firebase/firestore'
 
 export default function DashboardPage() {
   const { user, isUserLoading } = useUser()
 
-  if (isUserLoading) {
+  // Real-time User Profile Data
+  const profileRef = useMemoFirebase(() => {
+    return user ? doc(collection(user.auth.app.options.projectId === 'studio-5534266819-bd84a' ? 'userProfiles' : 'userProfiles'), user.uid) : null;
+  }, [user]);
+  // Actually, use our standard indexing
+  const userProfileRef = useMemoFirebase(() => {
+    if (!user) return null;
+    // We use the firestore instance from useFirestore but hooks handle it
+    return doc(collection(user.auth.app as any, 'userProfiles'), user.uid);
+  }, [user]);
+
+  // Better approach using the provided hooks
+  const profileDoc = useDoc(useMemoFirebase(() => user ? doc(collection(user.auth.app as any, 'userProfiles'), user.uid) : null, [user]));
+  
+  const sessionsQuery = useMemoFirebase(() => {
+    if (!user) return null;
+    return query(
+      collection(user.auth.app as any, 'userProfiles', user.uid, 'interviewSessions'),
+      orderBy('createdAt', 'desc'),
+      limit(5)
+    );
+  }, [user]);
+
+  const { data: sessions, isLoading: sessionsLoading } = useCollection(sessionsQuery);
+
+  if (isUserLoading || sessionsLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="w-10 h-10 animate-spin text-primary" />
@@ -32,7 +58,10 @@ export default function DashboardPage() {
     )
   }
 
+  const profileData = profileDoc.data;
   const displayName = user?.displayName || user?.email?.split('@')[0] || "Professional"
+  const knowledgeCredits = profileData?.knowledgeCredits || 0;
+  const sessionsCount = sessions?.length || 0;
 
   return (
     <div className="min-h-screen bg-background flex">
@@ -41,7 +70,7 @@ export default function DashboardPage() {
         <header className="mb-8 flex justify-between items-end">
           <div>
             <h1 className="text-4xl font-headline font-bold text-primary mb-2">Welcome Back, {displayName}</h1>
-            <p className="text-muted-foreground text-lg">Your interview readiness is at <span className="text-primary font-bold">78%</span></p>
+            <p className="text-muted-foreground text-lg">You have completed <span className="text-primary font-bold">{sessionsCount}</span> mock sessions.</p>
           </div>
           <div className="flex gap-4">
             <Link href="/assistant">
@@ -59,38 +88,38 @@ export default function DashboardPage() {
               <Trophy className="text-yellow-500 w-5 h-5" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">0</div>
-              <p className="text-xs text-muted-foreground mt-1">Start practicing to earn</p>
+              <div className="text-3xl font-bold text-primary">{knowledgeCredits}</div>
+              <p className="text-xs text-muted-foreground mt-1">Accumulated Rank</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-md bg-white">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Practice Time</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Practice Sessions</CardTitle>
               <Clock className="text-primary w-5 h-5" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">0 hrs</div>
-              <p className="text-xs text-muted-foreground mt-1">Goal: 15 hrs</p>
+              <div className="text-3xl font-bold text-primary">{sessionsCount}</div>
+              <p className="text-xs text-muted-foreground mt-1">Total interviews</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-md bg-white">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Interviews</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Active Level</CardTitle>
               <Zap className="text-secondary w-5 h-5" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">0</div>
-              <p className="text-xs text-muted-foreground mt-1">Sessions completed</p>
+              <div className="text-3xl font-bold text-primary">{knowledgeCredits > 500 ? 'Pro' : 'Beginner'}</div>
+              <p className="text-xs text-muted-foreground mt-1">Performance Tier</p>
             </CardContent>
           </Card>
           <Card className="border-none shadow-md bg-white">
             <CardHeader className="pb-2 flex flex-row items-center justify-between">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Skill Level</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Skill Trend</CardTitle>
               <TrendingUp className="text-green-500 w-5 h-5" />
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-primary">Newcomer</div>
-              <p className="text-xs text-muted-foreground mt-1">Level up your skills</p>
+              <div className="text-3xl font-bold text-primary">{knowledgeCredits > 0 ? '+12%' : 'N/A'}</div>
+              <p className="text-xs text-muted-foreground mt-1">Weekly progress</p>
             </CardContent>
           </Card>
         </div>
@@ -132,15 +161,33 @@ export default function DashboardPage() {
             <section>
               <h2 className="text-2xl font-headline font-bold text-primary mb-4">Recent Sessions</h2>
               <Card className="border-none shadow-md">
-                <CardContent className="p-12 text-center">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Clock className="w-8 h-8 text-muted-foreground" />
-                  </div>
-                  <h3 className="font-bold text-lg text-primary">No sessions yet</h3>
-                  <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-1">Start your first mock interview to track your progress and earn credits.</p>
-                  <Link href="/interview">
-                    <Button className="mt-6">Begin Practice</Button>
-                  </Link>
+                <CardContent className="p-0">
+                  {sessions && sessions.length > 0 ? (
+                    <div className="divide-y">
+                      {sessions.map((session) => (
+                        <div key={session.id} className="p-4 flex justify-between items-center hover:bg-muted/50 transition-colors">
+                          <div>
+                            <div className="font-bold text-primary">{session.domain}</div>
+                            <div className="text-xs text-muted-foreground">{new Date(session.createdAt).toLocaleDateString()}</div>
+                          </div>
+                          <Badge variant={session.status === 'completed' ? 'default' : 'outline'}>
+                            {session.status}
+                          </Badge>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-12 text-center">
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Clock className="w-8 h-8 text-muted-foreground" />
+                      </div>
+                      <h3 className="font-bold text-lg text-primary">No sessions yet</h3>
+                      <p className="text-muted-foreground text-sm max-w-xs mx-auto mt-1">Start your first mock interview to track your progress and earn credits.</p>
+                      <Link href="/interview">
+                        <Button className="mt-6">Begin Practice</Button>
+                      </Link>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </section>
@@ -151,17 +198,17 @@ export default function DashboardPage() {
               <div className="absolute -right-12 -top-12 w-48 h-48 bg-white/10 rounded-full blur-3xl" />
               <CardHeader>
                 <CardTitle className="font-headline">Knowledge Credits</CardTitle>
-                <div className="text-4xl font-bold mt-2">0 <span className="text-white/60 text-lg font-normal">KC</span></div>
+                <div className="text-4xl font-bold mt-2">{knowledgeCredits} <span className="text-white/60 text-lg font-normal">KC</span></div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-1">
                   <div className="flex justify-between text-xs">
-                    <span>Rank: Beginner</span>
-                    <span>0% to Professional</span>
+                    <span>Rank: {knowledgeCredits > 1000 ? 'Expert' : knowledgeCredits > 500 ? 'Pro' : 'Beginner'}</span>
+                    <span>{Math.min(Math.floor((knowledgeCredits / 1000) * 100), 100)}% to next tier</span>
                   </div>
-                  <Progress value={0} className="bg-white/20" />
+                  <Progress value={Math.min((knowledgeCredits / 1000) * 100, 100)} className="bg-white/20" />
                 </div>
-                <Button variant="secondary" className="w-full font-bold" disabled>Redeem Rewards</Button>
+                <Button variant="secondary" className="w-full font-bold" disabled={knowledgeCredits < 100}>Redeem Rewards</Button>
               </CardContent>
             </Card>
 

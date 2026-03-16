@@ -11,17 +11,18 @@ import {
   Zap, 
   TrendingUp, 
   BrainCircuit,
-  Trophy,
   ArrowRight,
   Sparkles,
-  CheckCircle2,
-  Code2,
-  UserCheck
+  CheckCircle2
 } from 'lucide-react'
 import { useUser } from '@/firebase'
 
 export default function LandingPage() {
   const { user } = useUser()
+
+  const scrollToFeatures = () => {
+    document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' });
+  }
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -71,14 +72,14 @@ export default function LandingPage() {
                 Start Free Practice <ArrowRight className="w-5 h-5" />
               </Button>
             </Link>
-            <Button variant="outline" size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl">
+            <Button variant="outline" size="lg" className="h-14 px-10 text-lg font-bold rounded-2xl" onClick={scrollToFeatures}>
               See How It Works
             </Button>
           </div>
         </section>
 
-        {/* Visual Features Section (Inspired by User Request) */}
-        <section className="py-24 bg-primary/[0.02] border-y">
+        {/* Visual Features Section */}
+        <section id="features" className="py-24 bg-primary/[0.02] border-y">
           <div className="max-w-7xl mx-auto px-6">
             <h2 className="text-4xl md:text-5xl font-headline font-bold text-center text-primary mb-20">
               Powerful Features for Career Growth

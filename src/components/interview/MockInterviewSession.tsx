@@ -1,3 +1,4 @@
+
 "use client"
 
 import React, { useState, useEffect, useRef } from 'react'
@@ -26,6 +27,8 @@ import { aiInterviewAnswerFeedback, type InterviewAnswerFeedbackOutput } from '@
 import { questionTTS } from '@/ai/flows/question-tts-flow'
 import { useSpeechRecognition } from '@/hooks/use-speech-recognition'
 import { cn } from '@/lib/utils'
+import { useUser, useFirestore, addDocumentNonBlocking, updateDocumentNonBlocking } from '@/firebase'
+import { collection, doc, serverTimestamp, setDoc } from 'firebase/firestore'
 
 type InterviewState = 'idle' | 'questioning' | 'answering' | 'evaluating' | 'finished'
 
@@ -45,6 +48,8 @@ const DOMAINS = [
 ]
 
 export function MockInterviewSession() {
+  const { user } = useUser()
+  const db = useFirestore()
   const [state, setState] = useState<InterviewState>('idle')
   const [selectedDomain, setSelectedDomain] = useState('Frontend Developer')
   const [currentQuestion, setCurrentQuestion] = useState<GenerateMockInterviewQuestionOutput | null>(null)
@@ -52,6 +57,7 @@ export function MockInterviewSession() {
   const [isLoading, setIsLoading] = useState(false)
   const [questionsAnswered, setQuestionsAnswered] = useState(0)
   const [codeAnswer, setCodeAnswer] = useState('')
+  const [sessionId, setSessionId] = useState<string | null>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const { isListening, transcript, startListening, stopListening } = useSpeechRecognition()
   const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -69,8 +75,22 @@ export function MockInterviewSession() {
   }
 
   const startInterview = async () => {
+    if (!user) return;
     setIsLoading(true)
     try {
+      // Create a session in Firestore
+      const sessionRef = collection(db, 'userProfiles', user.uid, 'interviewSessions');
+      const newSession = {
+        userId: user.uid,
+        domain: selectedDomain,
+        status: 'started',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      const docRef = await addDocumentNonBlocking(sessionRef, newSession);
+      if (docRef) setSessionId(docRef.id);
+
       const q = await generateMockInterviewQuestion({ domain: selectedDomain })
       setCurrentQuestion(q)
       setCodeAnswer(q.initialCode || '')
@@ -107,20 +127,62 @@ export function MockInterviewSession() {
   }
 
   const submitAnswer = async (spokenTranscript?: string) => {
+    if (!user || !sessionId || !currentQuestion) return;
+    
     stopListening()
     setIsLoading(true)
     setState('evaluating')
+    
     try {
-      if (currentQuestion) {
-        const result = await aiInterviewAnswerFeedback({
-          domain: selectedDomain,
-          question: currentQuestion.question,
-          userAnswer: spokenTranscript || transcript,
-          codeSnippet: currentQuestion.type === 'solving' ? codeAnswer : undefined
-        })
-        setFeedback(result)
-        setQuestionsAnswered(prev => prev + 1)
+      const result = await aiInterviewAnswerFeedback({
+        domain: selectedDomain,
+        question: currentQuestion.question,
+        userAnswer: spokenTranscript || transcript,
+        codeSnippet: currentQuestion.type === 'solving' ? codeAnswer : undefined
+      })
+      
+      setFeedback(result)
+      setQuestionsAnswered(prev => prev + 1)
+
+      // Save question and answer to Firestore
+      const questionRef = collection(db, 'userProfiles', user.uid, 'interviewSessions', sessionId, 'interviewQuestions');
+      const qData = {
+        userId: user.uid,
+        interviewSessionId: sessionId,
+        questionText: currentQuestion.question,
+        questionType: currentQuestion.type,
+        sequenceNumber: questionsAnswered + 1,
+        createdAt: new Date().toISOString(),
+      };
+      const newQRef = await addDocumentNonBlocking(questionRef, qData);
+
+      if (newQRef) {
+        const answerRef = doc(db, 'userProfiles', user.uid, 'interviewSessions', sessionId, 'interviewQuestions', newQRef.id, 'answer', 'answer');
+        const aData = {
+          userId: user.uid,
+          interviewSessionId: sessionId,
+          interviewQuestionId: newQRef.id,
+          answerText: spokenTranscript || transcript,
+          codeSnippet: codeAnswer,
+          clarityFeedback: result.clarityFeedback,
+          confidenceFeedback: result.confidenceAssessment,
+          technicalAccuracyFeedback: result.technicalAccuracyFeedback,
+          improvementSuggestions: result.improvementSuggestions.join(', '),
+          score: result.overallScore,
+          knowledgeCreditsEarned: result.overallScore * 10,
+          evaluatedAt: new Date().toISOString(),
+        };
+        setDoc(answerRef, aData);
+
+        // Update user profile credits
+        const profileRef = doc(db, 'userProfiles', user.uid);
+        // We assume UserProfile exists since auth is active, but we should be safe
+        setDoc(profileRef, { 
+          knowledgeCredits: (questionsAnswered === 0 ? 0 : 0) + (result.overallScore * 10),
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
       }
+
     } catch (error) {
       console.error(error)
     } finally {
