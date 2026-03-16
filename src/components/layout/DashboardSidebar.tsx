@@ -1,8 +1,9 @@
+
 "use client"
 
 import React from 'react'
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { 
   Mic2, 
   History, 
@@ -17,6 +18,8 @@ import {
 import { cn } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
+import { useAuth } from '@/firebase'
+import { signOut } from 'firebase/auth'
 
 const navItems = [
   { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -28,11 +31,18 @@ const navItems = [
 
 export function DashboardSidebar() {
   const pathname = usePathname()
+  const auth = useAuth()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut(auth)
+    router.push('/')
+  }
 
   return (
     <aside className="w-64 border-r bg-white flex flex-col h-screen fixed left-0 top-0 z-40">
       <div className="p-6">
-        <Link href="/dashboard" className="flex items-center gap-2">
+        <Link href="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
             <MessageSquareQuote className="text-white w-5 h-5" />
           </div>
@@ -67,7 +77,11 @@ export function DashboardSidebar() {
             Profile
           </span>
         </Link>
-        <Button variant="ghost" className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive">
+        <Button 
+          variant="ghost" 
+          className="w-full justify-start gap-3 text-muted-foreground hover:text-destructive"
+          onClick={handleSignOut}
+        >
           <LogOut className="w-5 h-5" />
           Sign Out
         </Button>
