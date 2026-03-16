@@ -49,10 +49,21 @@ export default function AuthPage() {
       }
       router.push('/dashboard')
     } catch (error: any) {
+      let errorMessage = error.message;
+      
+      // Provide more user-friendly messages for common errors
+      if (isLogin && (error.code === 'auth/invalid-credential' || error.code === 'auth/user-not-found')) {
+        errorMessage = "Invalid email or password. If you don't have an account, please sign up.";
+      } else if (!isLogin && error.code === 'auth/email-already-in-use') {
+        errorMessage = "This email is already registered. Please sign in instead.";
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage = "Incorrect password. Please try again or reset your password.";
+      }
+
       toast({
         variant: "destructive",
         title: "Authentication Error",
-        description: error.message
+        description: errorMessage
       })
     } finally {
       setIsLoading(false)
