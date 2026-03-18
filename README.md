@@ -136,10 +136,10 @@ Small changes are welcome too.
 
 ---
 
-## 👨‍💻 Author
+👨‍💻 Author
 
-**Dharshini**
-GitHub: [https://github.com/skillQuanta](https://github.com/skillQuanta)
+Dharshini
+GitHub: https://github.com/dharshuvani13-source
 
 ---
 
